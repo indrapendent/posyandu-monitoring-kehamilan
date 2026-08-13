@@ -20,51 +20,38 @@ export default function NewMotherPage() {
   }
 
   async function handleSubmit(
-    e: React.FormEvent<HTMLFormElement>
-  ) {
-    e.preventDefault();
+  e: React.FormEvent<HTMLFormElement>
+) {
+  e.preventDefault();
 
-    const payload = {
-      mother_id: `M${Date.now()}`,
-      nama,
-      tanggal_lahir: tanggalLahir,
-      nomor_hp: nomorHp,
-      alamat,
-      hpht,
-      hpl,
-    };
+  const payload = {
+    mother_id: `M${Date.now()}`,
+    nama,
+    tanggal_lahir: tanggalLahir,
+    nomor_hp: nomorHp,
+    alamat,
+    hpht,
+    hpl,
+  };
 
-    try {
-      const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbxW2lxx4EVW4a8SowECKtCOJTtNk3rUUJt4BRSd66Nok8Majlat0qft2qdq1gID2cKy/exec",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+  try {
+    const response = await fetch("/api/mothers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-      const result = await response.json();
+    const result = await response.json();
 
-      if (result.success) {
-        alert("Data ibu hamil berhasil disimpan");
-
-        setNama("");
-        setTanggalLahir("");
-        setNomorHp("");
-        setAlamat("");
-        setHpht("");
-        setHpl("");
-      } else {
-        alert("Gagal menyimpan data");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Terjadi kesalahan saat menyimpan data");
-    }
+    alert(
+      JSON.stringify(result, null, 2)
+    );
+  } catch (error) {
+    alert(String(error));
   }
+}
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
