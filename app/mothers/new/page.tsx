@@ -8,25 +8,62 @@ export default function NewMotherPage() {
   const [nomorHp, setNomorHp] = useState("");
   const [alamat, setAlamat] = useState("");
   const [hpht, setHpht] = useState("");
+  const [hpl, setHpl] = useState("");
 
-  function handleSubmit(
+  function calculateHPL(date: string) {
+    if (!date) return "";
+
+    const hphtDate = new Date(date);
+    hphtDate.setDate(hphtDate.getDate() + 280);
+
+    return hphtDate.toISOString().split("T")[0];
+  }
+
+  async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
   ) {
     e.preventDefault();
 
-    alert(
-      JSON.stringify(
+    const payload = {
+      mother_id: `M${Date.now()}`,
+      nama,
+      tanggal_lahir: tanggalLahir,
+      nomor_hp: nomorHp,
+      alamat,
+      hpht,
+      hpl,
+    };
+
+    try {
+      const response = await fetch(
+        "https://script.google.com/macros/s/AKfycbxW2lxx4EVW4a8SowECKtCOJTtNk3rUUJt4BRSd66Nok8Majlat0qft2qdq1gID2cKy/exec",
         {
-          nama,
-          tanggalLahir,
-          nomorHp,
-          alamat,
-          hpht,
-        },
-        null,
-        2
-      )
-    );
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Data ibu hamil berhasil disimpan");
+
+        setNama("");
+        setTanggalLahir("");
+        setNomorHp("");
+        setAlamat("");
+        setHpht("");
+        setHpl("");
+      } else {
+        alert("Gagal menyimpan data");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Terjadi kesalahan saat menyimpan data");
+    }
   }
 
   return (
@@ -50,6 +87,7 @@ export default function NewMotherPage() {
               value={nama}
               onChange={(e) => setNama(e.target.value)}
               className="w-full rounded-lg border p-3"
+              required
             />
           </div>
 
@@ -65,6 +103,7 @@ export default function NewMotherPage() {
                 setTanggalLahir(e.target.value)
               }
               className="w-full rounded-lg border p-3"
+              required
             />
           </div>
 
@@ -80,6 +119,7 @@ export default function NewMotherPage() {
                 setNomorHp(e.target.value)
               }
               className="w-full rounded-lg border p-3"
+              required
             />
           </div>
 
@@ -95,6 +135,7 @@ export default function NewMotherPage() {
               }
               className="w-full rounded-lg border p-3"
               rows={3}
+              required
             />
           </div>
 
@@ -106,8 +147,27 @@ export default function NewMotherPage() {
             <input
               type="date"
               value={hpht}
-              onChange={(e) => setHpht(e.target.value)}
+              onChange={(e) => {
+                setHpht(e.target.value);
+                setHpl(
+                  calculateHPL(e.target.value)
+                );
+              }}
               className="w-full rounded-lg border p-3"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block font-medium">
+              HPL
+            </label>
+
+            <input
+              type="date"
+              value={hpl}
+              readOnly
+              className="w-full rounded-lg border bg-gray-100 p-3"
             />
           </div>
 
