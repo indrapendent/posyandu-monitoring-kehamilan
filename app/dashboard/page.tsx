@@ -1,18 +1,41 @@
 import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
-  return (
-    <main className="p-8">
-      <h1 className="text-3xl font-bold mb-4">
-        Dashboard
-      </h1>
+  if (!session) {
+    redirect("/login");
+  }
 
-      <pre>
-        {JSON.stringify(session, null, 2)}
-      </pre>
+  return (
+    <main className="min-h-screen bg-gray-50 p-8">
+      <div className="mx-auto max-w-4xl">
+        <h1 className="mb-2 text-3xl font-bold text-green-700">
+          Dashboard Monitoring Kehamilan
+        </h1>
+
+        <p className="mb-8 text-gray-600">
+          Selamat datang di aplikasi monitoring ibu hamil.
+        </p>
+
+        <div className="rounded-xl bg-white p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold">
+            Informasi Pengguna
+          </h2>
+
+          <div className="space-y-2">
+            <p>
+              <strong>Nama:</strong> {session.user?.name}
+            </p>
+
+            <p>
+              <strong>Email:</strong> {session.user?.email}
+            </p>
+          </div>
+        </div>
+      </div>
     </main>
   );
 }
