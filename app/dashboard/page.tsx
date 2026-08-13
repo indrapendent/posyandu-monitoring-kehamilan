@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import LogoutButton from "@/components/LogoutButton";
+import Link from "next/link";
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
@@ -36,8 +37,13 @@ export default async function DashboardPage() {
           </div>
         </div>
         <div className="mt-6">
-  <LogoutButton />
-</div>
+          <Link href="/mothers">
+            <button className="rounded-xl bg-green-600 px-4 py-2 text-white">
+              Lihat Data Ibu Hamil
+            </button>
+          </Link>
+          <LogoutButton />
+        </div>
       </div>
     </main>
   );
