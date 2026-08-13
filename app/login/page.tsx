@@ -11,11 +11,16 @@ export default function LoginPage() {
         </h1>
 
         <button
-          onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-          className="rounded-xl bg-green-600 px-6 py-3 text-white hover:bg-green-700"
-        >
-          Login dengan Google
-        </button>
+  onClick={() =>
+    signIn("google", {
+      callbackUrl: "/dashboard",
+      prompt: "select_account",
+    })
+  }
+  className="rounded-xl bg-green-600 px-6 py-3 text-white hover:bg-green-700"
+>
+  Login dengan Google
+</button>
       </div>
     </main>
   );
