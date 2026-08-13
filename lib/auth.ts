@@ -12,6 +12,16 @@ export const authOptions: AuthOptions = {
         },
       },
     }),
+    
   ],
+  callbacks: {
+  async signIn({ user }) {
+    const allowedEmails = [
+      "indrapper11@gmail.com",
+    ];
+
+    return allowedEmails.includes(user.email ?? "");
+  },
+},
   secret: process.env.AUTH_SECRET,
 };
