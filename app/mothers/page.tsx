@@ -9,14 +9,11 @@ interface Mother {
 }
 
 function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString(
-    "id-ID",
-    {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }
-  );
+  return new Date(dateString).toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 async function getMothers(): Promise<Mother[]> {
@@ -40,7 +37,6 @@ export default async function MothersPage() {
           <h1 className="text-3xl font-bold text-green-700">
             Data Ibu Hamil
           </h1>
-
           <Link
             href="/mothers/new"
             className="rounded-xl bg-green-700 px-4 py-2 text-white"
@@ -67,7 +63,9 @@ export default async function MothersPage() {
                   className="border-t"
                 >
                   <td className="p-4">
-                    {mother.nama}
+                    <Link href={`/mothers/${mother.mother_id}`}>
+                      {mother.nama}
+                    </Link>
                   </td>
 
                   <td className="p-4">
