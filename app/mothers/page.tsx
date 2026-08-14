@@ -1,6 +1,38 @@
 import Link from "next/link";
 
-export default function MothersPage() {
+interface Mother {
+  mother_id: string;
+  nama: string;
+  nomor_hp: string;
+  hpht: string;
+  hpl: string;
+}
+
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString(
+    "id-ID",
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }
+  );
+}
+
+async function getMothers(): Promise<Mother[]> {
+  const response = await fetch(
+    "http://localhost:3000/api/mothers",
+    {
+      cache: "no-store",
+    }
+  );
+
+  return response.json();
+}
+
+export default async function MothersPage() {
+  const mothers = await getMothers();
+
   return (
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-6xl">
@@ -8,9 +40,10 @@ export default function MothersPage() {
           <h1 className="text-3xl font-bold text-green-700">
             Data Ibu Hamil
           </h1>
+
           <Link
             href="/mothers/new"
-            className="rounded-xl bg-green-600 px-4 py-2 text-white hover:shadow"
+            className="rounded-xl bg-green-700 px-4 py-2 text-white"
           >
             Tambah Data
           </Link>
@@ -28,12 +61,28 @@ export default function MothersPage() {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="p-4">Belum ada data</td>
-                <td className="p-4">-</td>
-                <td className="p-4">-</td>
-                <td className="p-4">-</td>
-              </tr>
+              {mothers.map((mother) => (
+                <tr
+                  key={mother.mother_id}
+                  className="border-t"
+                >
+                  <td className="p-4">
+                    {mother.nama}
+                  </td>
+
+                  <td className="p-4">
+                    {mother.nomor_hp}
+                  </td>
+
+                  <td className="p-4">
+                    {formatDate(mother.hpht)}
+                  </td>
+
+                  <td className="p-4">
+                    {formatDate(mother.hpl)}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
