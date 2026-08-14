@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cache } from "react";
 
 interface Mother {
   mother_id: string;
@@ -18,10 +19,10 @@ function formatDate(dateString: string) {
 
 async function getMothers(): Promise<Mother[]> {
   const response = await fetch(
-    "http://localhost:3000/api/mothers",
-    {
-      cache: "no-store",
-    }
+    process.env.NEXT_PUBLIC_APP_URL + "/api/mothers",
+{
+  cache: "no-store",
+}
   );
 
   return response.json();
