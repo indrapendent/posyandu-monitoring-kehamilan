@@ -1,3 +1,6 @@
+import Link from "next/link";
+import Navbar from "@/components/Navbar";
+
 interface Mother {
   mother_id: string;
   nama: string;
@@ -6,6 +9,18 @@ interface Mother {
   alamat: string;
   hpht: string;
   hpl: string;
+}
+
+interface Examination {
+  examination_id: string;
+  mother_id: string;
+  tanggal_pemeriksaan: string;
+  berat_badan: number;
+  tekanan_darah: string;
+  lila: number;
+  keluhan: string;
+  catatan: string;
+  status_risiko: string;
 }
 
 interface PageProps {
@@ -27,11 +42,27 @@ function formatDate(dateString: string) {
 
 async function getMothers(): Promise<Mother[]> {
   const response = await fetch(
-    "http://localhost:3000/api/mothers",
-    {
-      cache: "no-store",
-    }
-  );
+  `${process.env.NEXT_PUBLIC_APP_URL}/api/mothers`,
+  {
+    next: {
+      revalidate: 60,
+    },
+  }
+);
+  return response.json();
+}
+
+async function getExaminations(): Promise<
+  Examination[]
+> {
+  const response = await fetch(
+  `${process.env.NEXT_PUBLIC_APP_URL}/api/mothers`,
+  {
+    next: {
+      revalidate: 60,
+    },
+  }
+);
 
   return response.json();
 }
@@ -42,6 +73,7 @@ export default async function MotherDetailPage({
   const { id } = await params;
 
   const mothers = await getMothers();
+  const examinations = await getExaminations();
 
   const mother = mothers.find(
     (m) => m.mother_id === id
@@ -57,9 +89,15 @@ export default async function MotherDetailPage({
     );
   }
 
+  const motherExaminations =
+    examinations.filter(
+      (exam) => exam.mother_id === id
+    );
+
   return (
     <main className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-6xl">
+        <Navbar />
         <h1 className="mb-6 text-3xl font-bold text-green-700">
           Detail Ibu Hamil
         </h1>
@@ -80,7 +118,9 @@ export default async function MotherDetailPage({
                 Tanggal Lahir
               </p>
               <p className="font-medium">
-                {formatDate(mother.tanggal_lahir)}
+                {formatDate(
+                  mother.tanggal_lahir
+                )}
               </p>
             </div>
 
@@ -119,9 +159,63 @@ export default async function MotherDetailPage({
                 {formatDate(mother.hpl)}
               </p>
             </div>
+
+            <div className="pt-4">
+              <Link
+                href={`/mothers/${id}/examinations/new`}
+                className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+              >
+                Tambah Pemeriksaan
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
-    </main>
-  );
-}
+
+        <div className="mt-8 rounded-xl bg-white p-6 shadow">
+          <h2 className="mb-4 text-2xl font-bold">
+            Riwayat Pemeriksaan
+          </h2>
+
+                    {motherExaminations.length === 0 ? (
+                      <p className="text-gray-500">
+                        Belum ada riwayat pemeriksaan.
+                      </p>
+                    ) : (
+                      <div className="space-y-4">
+                        {motherExaminations.map(
+                          (exam) => (
+                            <div
+                              key={exam.examination_id}
+                              className="rounded-lg border p-4"
+                            >
+                              <p className="font-medium">
+                                {formatDate(
+                                  exam.tanggal_pemeriksaan
+                                )}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                Berat: {exam.berat_badan} kg |
+                                Tekanan Darah:{" "}
+                                {exam.tekanan_darah} | LILA:{" "}
+                                {exam.lila} cm
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                Keluhan: {exam.keluhan}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                Catatan: {exam.catatan}
+                              </p>
+                              <p className="text-sm font-medium">
+                                Status Risiko:{" "}
+                                {exam.status_risiko}
+                              </p>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </main>
+            );
+          }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
+import Navbar from "@/components/Navbar";
 
 export default function NewExaminationPage() {
   const params = useParams();
@@ -25,11 +26,36 @@ export default function NewExaminationPage() {
   const [catatan, setCatatan] =
     useState("");
 
+  function calculateRisk() {
+    const lilaValue = parseFloat(lila);
+
+    const tekananParts =
+      tekananDarah.split("/");
+
+    const sistolik = parseInt(
+      tekananParts[0] || "0"
+    );
+
+    const diastolik = parseInt(
+      tekananParts[1] || "0"
+    );
+
+    if (
+      lilaValue < 23.5 ||
+      sistolik >= 140 ||
+      diastolik >= 90
+    ) {
+      return "Risiko Tinggi";
+    }
+
+    return "Risiko Rendah";
+  }
+
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
   ) {
     e.preventDefault();
-
+    alert("submit jalan");
     const payload = {
       examination_id: `E${Date.now()}`,
       mother_id: motherId,
@@ -39,10 +65,11 @@ export default function NewExaminationPage() {
       lila,
       keluhan,
       catatan,
-      status_risiko: "Belum Dinilai",
+      status_risiko: calculateRisk(),
     };
-
+    alert(payload.status_risiko);
     try {
+      alert("sebelum fetch");
       const response = await fetch(
         "/api/examinations",
         {
@@ -54,12 +81,15 @@ export default function NewExaminationPage() {
           body: JSON.stringify(payload),
         }
       );
+        alert("sesudah fetch");
 
       const result = await response.json();
 
       alert(
-        JSON.stringify(result, null, 2)
+        `Pemeriksaan berhasil disimpan\n\nStatus Risiko: ${payload.status_risiko}`
       );
+
+      console.log(result);
     } catch (error) {
       alert(String(error));
     }
@@ -68,7 +98,8 @@ export default function NewExaminationPage() {
   return (
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-3xl">
-        <h1 className="mb-6 text-3xl font-bold text-green-700">
+        <Navbar />
+<h1 className="mb-6 text-3xl font-bold text-green-700">
           Tambah Pemeriksaan Kehamilan
         </h1>
 

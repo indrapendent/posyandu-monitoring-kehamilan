@@ -20,9 +20,6 @@ function formatDate(dateString: string) {
 async function getMothers(): Promise<Mother[]> {
   const response = await fetch(
     process.env.NEXT_PUBLIC_APP_URL + "/api/mothers",
-{
-  cache: "no-store",
-}
   );
 
   return response.json();

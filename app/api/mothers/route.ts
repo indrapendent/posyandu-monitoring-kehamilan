@@ -1,3 +1,4 @@
+export const revalidate = 60;
 import { NextResponse } from "next/server";
 
 const APPS_SCRIPT_URL =
@@ -5,7 +6,9 @@ const APPS_SCRIPT_URL =
 
 export async function GET() {
   try {
-    const response = await fetch(APPS_SCRIPT_URL);
+    const response = await fetch(
+      `${APPS_SCRIPT_URL}?type=mothers`
+    );
 
     const data = await response.json();
 

@@ -1,7 +1,30 @@
+export const revalidate = 60;
 import { NextResponse } from "next/server";
 
 const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxW2lxx4EVW4a8SowECKtCOJTtNk3rUUJt4BRSd66Nok8Majlat0qft2qdq1gID2cKy/exec";
+
+export async function GET() {
+  try {
+    const response = await fetch(
+      `${APPS_SCRIPT_URL}?type=examinations`
+    );
+
+    const data = await response.json();
+
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: String(error),
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
 
 export async function POST(
   request: Request
@@ -38,3 +61,4 @@ export async function POST(
     );
   }
 }
+``

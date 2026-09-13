@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Navbar from "@/components/Navbar";
 
 export default function NewMotherPage() {
   const [nama, setNama] = useState("");
@@ -56,6 +57,7 @@ export default function NewMotherPage() {
   return (
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-3xl">
+        <Navbar />
         <h1 className="mb-6 text-3xl font-bold text-green-700">
           Tambah Data Ibu Hamil
         </h1>
