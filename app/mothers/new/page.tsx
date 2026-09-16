@@ -1,63 +1,96 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 
 export default function NewMotherPage() {
+  const router = useRouter();
+
   const [nama, setNama] = useState("");
-  const [tanggalLahir, setTanggalLahir] = useState("");
-  const [nomorHp, setNomorHp] = useState("");
-  const [alamat, setAlamat] = useState("");
-  const [hpht, setHpht] = useState("");
-  const [hpl, setHpl] = useState("");
+  const [tanggalLahir, setTanggalLahir] =
+    useState("");
+  const [nomorHp, setNomorHp] =
+    useState("");
+  const [alamat, setAlamat] =
+    useState("");
+  const [hpht, setHpht] =
+    useState("");
+  const [hpl, setHpl] =
+    useState("");
+  const [isLoading, setIsLoading] =
+    useState(false);
 
   function calculateHPL(date: string) {
     if (!date) return "";
 
     const hphtDate = new Date(date);
-    hphtDate.setDate(hphtDate.getDate() + 280);
+    hphtDate.setDate(
+      hphtDate.getDate() + 280
+    );
 
-    return hphtDate.toISOString().split("T")[0];
+    return hphtDate
+      .toISOString()
+      .split("T")[0];
   }
 
   async function handleSubmit(
-  e: React.FormEvent<HTMLFormElement>
-) {
-  e.preventDefault();
+    e: React.FormEvent<HTMLFormElement>
+  ) {
+    e.preventDefault();
 
-  const payload = {
-    mother_id: `M${Date.now()}`,
-    nama,
-    tanggal_lahir: tanggalLahir,
-    nomor_hp: nomorHp,
-    alamat,
-    hpht,
-    hpl,
-  };
+    setIsLoading(true);
 
-  try {
-    const response = await fetch("/api/mothers", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    const payload = {
+      nama,
+      tanggal_lahir: tanggalLahir,
+      nomor_hp: nomorHp,
+      alamat,
+      hpht,
+      hpl,
+    };
 
-    const result = await response.json();
+    try {
+      const response = await fetch(
+        "/api/mothers",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
-    alert(
-      JSON.stringify(result, null, 2)
-    );
-  } catch (error) {
-    alert(String(error));
+      const result =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+            "Gagal menyimpan data"
+        );
+      }
+
+      alert(
+        "✅ Data ibu hamil berhasil disimpan"
+      );
+
+      router.push("/mothers");
+      router.refresh();
+    } catch (error) {
+      alert(String(error));
+    } finally {
+      setIsLoading(false);
+    }
   }
-}
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-3xl">
         <Navbar />
+
         <h1 className="mb-6 text-3xl font-bold text-green-700">
           Tambah Data Ibu Hamil
         </h1>
@@ -74,7 +107,9 @@ export default function NewMotherPage() {
             <input
               type="text"
               value={nama}
-              onChange={(e) => setNama(e.target.value)}
+              onChange={(e) =>
+                setNama(e.target.value)
+              }
               className="w-full rounded-lg border p-3"
               required
             />
@@ -89,7 +124,9 @@ export default function NewMotherPage() {
               type="date"
               value={tanggalLahir}
               onChange={(e) =>
-                setTanggalLahir(e.target.value)
+                setTanggalLahir(
+                  e.target.value
+                )
               }
               className="w-full rounded-lg border p-3"
               required
@@ -105,7 +142,9 @@ export default function NewMotherPage() {
               type="text"
               value={nomorHp}
               onChange={(e) =>
-                setNomorHp(e.target.value)
+                setNomorHp(
+                  e.target.value
+                )
               }
               className="w-full rounded-lg border p-3"
               required
@@ -137,9 +176,14 @@ export default function NewMotherPage() {
               type="date"
               value={hpht}
               onChange={(e) => {
-                setHpht(e.target.value);
+                setHpht(
+                  e.target.value
+                );
+
                 setHpl(
-                  calculateHPL(e.target.value)
+                  calculateHPL(
+                    e.target.value
+                  )
                 );
               }}
               className="w-full rounded-lg border p-3"
@@ -162,9 +206,12 @@ export default function NewMotherPage() {
 
           <button
             type="submit"
-            className="rounded-xl bg-green-600 px-6 py-3 text-white hover:bg-green-700"
+            disabled={isLoading}
+            className="rounded-xl bg-green-600 px-6 py-3 text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-400"
           >
-            Simpan
+            {isLoading
+              ? "Menyimpan..."
+              : "Simpan"}
           </button>
         </form>
       </div>

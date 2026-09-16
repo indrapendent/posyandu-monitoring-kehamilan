@@ -1,27 +1,6 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-
-interface Mother {
-  mother_id: string;
-  nama: string;
-  tanggal_lahir: string;
-  nomor_hp: string;
-  alamat: string;
-  hpht: string;
-  hpl: string;
-}
-
-interface Examination {
-  examination_id: string;
-  mother_id: string;
-  tanggal_pemeriksaan: string;
-  berat_badan: number;
-  tekanan_darah: string;
-  lila: number;
-  keluhan: string;
-  catatan: string;
-  status_risiko: string;
-}
+import { supabase } from "@/lib/supabase";
 
 interface PageProps {
   params: Promise<{
@@ -40,46 +19,19 @@ function formatDate(dateString: string) {
   );
 }
 
-async function getMothers(): Promise<Mother[]> {
-  const response = await fetch(
-  `${process.env.NEXT_PUBLIC_APP_URL}/api/mothers`,
-  {
-    next: {
-      revalidate: 60,
-    },
-  }
-);
-  return response.json();
-}
-
-async function getExaminations(): Promise<
-  Examination[]
-> {
-  const response = await fetch(
-  `${process.env.NEXT_PUBLIC_APP_URL}/api/mothers`,
-  {
-    next: {
-      revalidate: 60,
-    },
-  }
-);
-
-  return response.json();
-}
-
 export default async function MotherDetailPage({
   params,
 }: PageProps) {
   const { id } = await params;
 
-  const mothers = await getMothers();
-  const examinations = await getExaminations();
+  const { data: mother, error: motherError } =
+    await supabase
+      .from("mothers")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-  const mother = mothers.find(
-    (m) => m.mother_id === id
-  );
-
-  if (!mother) {
+  if (motherError || !mother) {
     return (
       <main className="p-8">
         <h1 className="text-3xl font-bold">
@@ -89,15 +41,20 @@ export default async function MotherDetailPage({
     );
   }
 
-  const motherExaminations =
-    examinations.filter(
-      (exam) => exam.mother_id === id
-    );
+  const { data: examinations } =
+    await supabase
+      .from("examinations")
+      .select("*")
+      .eq("mother_id", id)
+      .order("tanggal_pemeriksaan", {
+        ascending: false,
+      });
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-6xl">
         <Navbar />
+
         <h1 className="mb-6 text-3xl font-bold text-green-700">
           Detail Ibu Hamil
         </h1>
@@ -176,46 +133,64 @@ export default async function MotherDetailPage({
             Riwayat Pemeriksaan
           </h2>
 
-                    {motherExaminations.length === 0 ? (
-                      <p className="text-gray-500">
-                        Belum ada riwayat pemeriksaan.
-                      </p>
-                    ) : (
-                      <div className="space-y-4">
-                        {motherExaminations.map(
-                          (exam) => (
-                            <div
-                              key={exam.examination_id}
-                              className="rounded-lg border p-4"
-                            >
-                              <p className="font-medium">
-                                {formatDate(
-                                  exam.tanggal_pemeriksaan
-                                )}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                Berat: {exam.berat_badan} kg |
-                                Tekanan Darah:{" "}
-                                {exam.tekanan_darah} | LILA:{" "}
-                                {exam.lila} cm
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                Keluhan: {exam.keluhan}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                Catatan: {exam.catatan}
-                              </p>
-                              <p className="text-sm font-medium">
-                                Status Risiko:{" "}
-                                {exam.status_risiko}
-                              </p>
-                            </div>
-                          )
-                        )}
-                      </div>
+          {!examinations ||
+          examinations.length === 0 ? (
+            <p className="text-gray-500">
+              Belum ada riwayat pemeriksaan.
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {examinations.map((exam) => (
+                <div
+                  key={exam.id}
+                  className="rounded-lg border p-4"
+                >
+                  <p className="font-medium">
+                    {formatDate(
+                      exam.tanggal_pemeriksaan
                     )}
-                  </div>
+                  </p>
+
+                  <p className="text-sm text-gray-600">
+                    Berat: {exam.berat_badan} kg
+                  </p>
+
+                  <p className="text-sm text-gray-600">
+                    Tekanan Darah:{" "}
+                    {exam.tekanan_darah}
+                  </p>
+
+                  <p className="text-sm text-gray-600">
+                    LILA: {exam.lila} cm
+                  </p>
+
+                  <p className="text-sm text-gray-600">
+                    Keluhan: {exam.keluhan}
+                  </p>
+
+                  <p className="text-sm text-gray-600">
+                    Catatan: {exam.catatan}
+                  </p>
+
+                  <p
+                    className={`font-semibold ${
+                      exam.status_risiko ===
+                      "Risiko Tinggi"
+                        ? "text-red-600"
+                        : exam.status_risiko ===
+                          "Risiko Sedang"
+                        ? "text-yellow-500"
+                        : "text-green-600"
+                    }`}
+                  >
+                    {exam.status_risiko}
+                  </p>
                 </div>
-              </main>
-            );
-          }
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}

@@ -1,59 +1,35 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
-import LogoutButton from "@/components/LogoutButton";
 import Link from "next/link";
+
+import { authOptions } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
+
 import Navbar from "@/components/Navbar";
+import LogoutButton from "@/components/LogoutButton";
 
-interface Mother {
-  mother_id: string;
-}
+async function getStatistics() {
+  const { data: mothers, error: mothersError } =
+    await supabase
+      .from("mothers")
+      .select("id");
 
-interface Examination {
-  status_risiko: string;
-}
+  const {
+    data: examinations,
+    error: examinationsError,
+  } = await supabase
+    .from("examinations")
+    .select("status_risiko");
 
-async function getMothers(): Promise<Mother[]> {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/mothers`,
-    {
-      next: {
-        revalidate: 60,
-      },
-    }
-  );
-
-  return response.json();
-}
-
-async function getExaminations(): Promise<
-  Examination[]
-> {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/examinations`,
-    {
-      next: {
-        revalidate: 60,
-      },
-    }
-  );
-
-  return response.json();
-}
-
-export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    redirect("/login");
+  if (mothersError) {
+    throw mothersError;
   }
 
-  const mothers = await getMothers();
-  const examinations =
-    await getExaminations();
+  if (examinationsError) {
+    throw examinationsError;
+  }
 
-  const totalMothers =
-    mothers.length;
+  const totalMothers = mothers.length;
 
   const totalExaminations =
     examinations.length;
@@ -65,6 +41,13 @@ export default async function DashboardPage() {
         "Risiko Rendah"
     ).length;
 
+  const risikoSedang =
+    examinations.filter(
+      (e) =>
+        e.status_risiko ===
+        "Risiko Sedang"
+    ).length;
+
   const risikoTinggi =
     examinations.filter(
       (e) =>
@@ -72,10 +55,31 @@ export default async function DashboardPage() {
         "Risiko Tinggi"
     ).length;
 
+  return {
+    totalMothers,
+    totalExaminations,
+    risikoRendah,
+    risikoSedang,
+    risikoTinggi,
+  };
+}
+
+export default async function DashboardPage() {
+  const session = await getServerSession(
+    authOptions
+  );
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  const stats = await getStatistics();
+
   return (
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-6xl">
         <Navbar />
+
         <h1 className="mb-2 text-3xl font-bold text-green-700">
           Dashboard Monitoring Kehamilan
         </h1>
@@ -85,13 +89,14 @@ export default async function DashboardPage() {
           monitoring ibu hamil.
         </p>
 
-        <div className="mb-8 grid gap-4 md:grid-cols-4">
+        <div className="mb-8 grid gap-4 md:grid-cols-5">
           <div className="rounded-xl bg-white p-6 shadow">
             <p className="text-sm text-gray-500">
               Total Ibu Hamil
             </p>
+
             <h2 className="text-3xl font-bold text-green-700">
-              {totalMothers}
+              {stats.totalMothers}
             </h2>
           </div>
 
@@ -99,8 +104,9 @@ export default async function DashboardPage() {
             <p className="text-sm text-gray-500">
               Total Pemeriksaan
             </p>
+
             <h2 className="text-3xl font-bold text-blue-600">
-              {totalExaminations}
+              {stats.totalExaminations}
             </h2>
           </div>
 
@@ -108,8 +114,19 @@ export default async function DashboardPage() {
             <p className="text-sm text-gray-500">
               Risiko Rendah
             </p>
+
             <h2 className="text-3xl font-bold text-green-600">
-              {risikoRendah}
+              {stats.risikoRendah}
+            </h2>
+          </div>
+
+          <div className="rounded-xl bg-white p-6 shadow">
+            <p className="text-sm text-gray-500">
+              Risiko Sedang
+            </p>
+
+            <h2 className="text-3xl font-bold text-yellow-500">
+              {stats.risikoSedang}
             </h2>
           </div>
 
@@ -117,8 +134,9 @@ export default async function DashboardPage() {
             <p className="text-sm text-gray-500">
               Risiko Tinggi
             </p>
+
             <h2 className="text-3xl font-bold text-red-600">
-              {risikoTinggi}
+              {stats.risikoTinggi}
             </h2>
           </div>
         </div>
@@ -141,16 +159,16 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="mt-6 flex gap-4">
-          <Link href="/mothers">
-            <button className="rounded-xl bg-green-600 px-4 py-2 text-white">
-              Lihat Data Ibu Hamil
-            </button>
-          </Link>
-
-          <LogoutButton />
-        </div>
-      </div>
-    </main>
-  );
-}
+            <div className="mt-6 flex gap-4">
+              <Link href="/mothers">
+                <button className="rounded-xl bg-green-600 px-4 py-2 text-white">
+                  Lihat Data Ibu Hamil
+                </button>
+              </Link>
+    
+              <LogoutButton />
+            </div>
+          </div>
+        </main>
+      );
+    }

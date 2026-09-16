@@ -1,21 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import {
+  useParams,
+  useRouter,
+} from "next/navigation";
 import Navbar from "@/components/Navbar";
 
 export default function NewExaminationPage() {
   const params = useParams();
+  const router = useRouter();
+
   const motherId = params.id as string;
 
-  const [tanggalPemeriksaan, setTanggalPemeriksaan] =
-    useState("");
+  const [
+    tanggalPemeriksaan,
+    setTanggalPemeriksaan,
+  ] = useState("");
 
   const [beratBadan, setBeratBadan] =
     useState("");
 
-  const [tekananDarah, setTekananDarah] =
-    useState("");
+  const [
+    tekananDarah,
+    setTekananDarah,
+  ] = useState("");
 
   const [lila, setLila] =
     useState("");
@@ -25,6 +34,9 @@ export default function NewExaminationPage() {
 
   const [catatan, setCatatan] =
     useState("");
+
+  const [isLoading, setIsLoading] =
+    useState(false);
 
   function calculateRisk() {
     const lilaValue = parseFloat(lila);
@@ -55,21 +67,25 @@ export default function NewExaminationPage() {
     e: React.FormEvent<HTMLFormElement>
   ) {
     e.preventDefault();
-    alert("submit jalan");
+
+    setIsLoading(true);
+
     const payload = {
-      examination_id: `E${Date.now()}`,
       mother_id: motherId,
-      tanggal_pemeriksaan: tanggalPemeriksaan,
-      berat_badan: beratBadan,
-      tekanan_darah: tekananDarah,
-      lila,
+      tanggal_pemeriksaan:
+        tanggalPemeriksaan,
+      berat_badan:
+        Number(beratBadan),
+      tekanan_darah:
+        tekananDarah,
+      lila: Number(lila),
       keluhan,
       catatan,
-      status_risiko: calculateRisk(),
+      status_risiko:
+        calculateRisk(),
     };
-    alert(payload.status_risiko);
+
     try {
-      alert("sebelum fetch");
       const response = await fetch(
         "/api/examinations",
         {
@@ -78,20 +94,35 @@ export default function NewExaminationPage() {
             "Content-Type":
               "application/json",
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(
+            payload
+          ),
         }
       );
-        alert("sesudah fetch");
 
-      const result = await response.json();
+      const result =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+            "Gagal menyimpan pemeriksaan"
+        );
+      }
 
       alert(
-        `Pemeriksaan berhasil disimpan\n\nStatus Risiko: ${payload.status_risiko}`
+        `✅ Pemeriksaan berhasil disimpan\n\nStatus Risiko: ${payload.status_risiko}`
       );
 
-      console.log(result);
+      router.push(
+        `/mothers/${motherId}`
+      );
+
+      router.refresh();
     } catch (error) {
       alert(String(error));
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -99,7 +130,8 @@ export default function NewExaminationPage() {
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-3xl">
         <Navbar />
-<h1 className="mb-6 text-3xl font-bold text-green-700">
+
+        <h1 className="mb-6 text-3xl font-bold text-green-700">
           Tambah Pemeriksaan Kehamilan
         </h1>
 
@@ -118,7 +150,9 @@ export default function NewExaminationPage() {
 
             <input
               type="date"
-              value={tanggalPemeriksaan}
+              value={
+                tanggalPemeriksaan
+              }
               onChange={(e) =>
                 setTanggalPemeriksaan(
                   e.target.value
@@ -138,7 +172,9 @@ export default function NewExaminationPage() {
               type="number"
               value={beratBadan}
               onChange={(e) =>
-                setBeratBadan(e.target.value)
+                setBeratBadan(
+                  e.target.value
+                )
               }
               className="w-full rounded-lg border p-3"
               required
@@ -174,7 +210,9 @@ export default function NewExaminationPage() {
               step="0.1"
               value={lila}
               onChange={(e) =>
-                setLila(e.target.value)
+                setLila(
+                  e.target.value
+                )
               }
               className="w-full rounded-lg border p-3"
               required
@@ -189,7 +227,9 @@ export default function NewExaminationPage() {
             <textarea
               value={keluhan}
               onChange={(e) =>
-                setKeluhan(e.target.value)
+                setKeluhan(
+                  e.target.value
+                )
               }
               rows={3}
               className="w-full rounded-lg border p-3"
@@ -204,7 +244,9 @@ export default function NewExaminationPage() {
             <textarea
               value={catatan}
               onChange={(e) =>
-                setCatatan(e.target.value)
+                setCatatan(
+                  e.target.value
+                )
               }
               rows={3}
               className="w-full rounded-lg border p-3"
@@ -213,9 +255,12 @@ export default function NewExaminationPage() {
 
           <button
             type="submit"
-            className="rounded-xl bg-green-600 px-6 py-3 text-white"
+            disabled={isLoading}
+            className="rounded-xl bg-green-600 px-6 py-3 text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-400"
           >
-            Simpan Pemeriksaan
+            {isLoading
+              ? "Menyimpan..."
+              : "Simpan Pemeriksaan"}
           </button>
         </form>
       </div>

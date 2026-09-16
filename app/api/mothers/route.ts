@@ -1,16 +1,18 @@
-export const revalidate = 300;
 import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
 
-const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxW2lxx4EVW4a8SowECKtCOJTtNk3rUUJt4BRSd66Nok8Majlat0qft2qdq1gID2cKy/exec";
+export const revalidate = 300;
 
 export async function GET() {
   try {
-    const response = await fetch(
-      `${APPS_SCRIPT_URL}?type=mothers`
-    );
+    const { data, error } = await supabase
+      .from("mothers")
+      .select("*")
+      .order("nama");
 
-    const data = await response.json();
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json(data);
   } catch (error) {
@@ -32,19 +34,27 @@ export async function POST(
   try {
     const body = await request.json();
 
-    const response = await fetch(
-      APPS_SCRIPT_URL,
-      {
-        method: "POST",
-        body: JSON.stringify(body),
-      }
-    );
+    const { data, error } = await supabase
+      .from("mothers")
+      .insert([
+        {
+          nama: body.nama,
+          tanggal_lahir: body.tanggal_lahir,
+          nomor_hp: body.nomor_hp,
+          alamat: body.alamat,
+          hpht: body.hpht,
+          hpl: body.hpl,
+        },
+      ])
+      .select();
 
-    const text = await response.text();
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json({
       success: true,
-      appsScriptResponse: text,
+      data,
     });
   } catch (error) {
     return NextResponse.json(

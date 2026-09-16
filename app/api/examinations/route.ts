@@ -1,16 +1,20 @@
-export const revalidate = 300;
 import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
 
-const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxW2lxx4EVW4a8SowECKtCOJTtNk3rUUJt4BRSd66Nok8Majlat0qft2qdq1gID2cKy/exec";
+export const revalidate = 300;
 
 export async function GET() {
   try {
-    const response = await fetch(
-      `${APPS_SCRIPT_URL}?type=examinations`
-    );
+    const { data, error } = await supabase
+      .from("examinations")
+      .select("*")
+      .order("tanggal_pemeriksaan", {
+        ascending: false,
+      });
 
-    const data = await response.json();
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json(data);
   } catch (error) {
@@ -32,22 +36,34 @@ export async function POST(
   try {
     const body = await request.json();
 
-    const response = await fetch(
-      APPS_SCRIPT_URL,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          type: "examination",
-          ...body,
-        }),
-      }
-    );
+    const { data, error } = await supabase
+      .from("examinations")
+      .insert([
+        {
+          mother_id: body.mother_id,
+          tanggal_pemeriksaan:
+            body.tanggal_pemeriksaan,
+          usia_kehamilan:
+            body.usia_kehamilan,
+          berat_badan: body.berat_badan,
+          tekanan_darah:
+            body.tekanan_darah,
+          lila: body.lila,
+          keluhan: body.keluhan,
+          catatan: body.catatan,
+          status_risiko:
+            body.status_risiko,
+        },
+      ])
+      .select();
 
-    const text = await response.text();
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json({
       success: true,
-      appsScriptResponse: text,
+      data,
     });
   } catch (error) {
     return NextResponse.json(
@@ -61,4 +77,3 @@ export async function POST(
     );
   }
 }
-``
