@@ -7,7 +7,7 @@ export default function Navbar() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <Link href="/dashboard" className="flex items-center gap-3">
         <Image
-          src="/logo-posyandu.png"
+          src="/logo-posyandu.PNG"
           alt="Logo Posyandu"
           width={48}
           height={48}
