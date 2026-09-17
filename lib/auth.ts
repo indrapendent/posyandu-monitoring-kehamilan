@@ -22,6 +22,7 @@ export const authOptions: AuthOptions = {
       "nuja88ninu@gmail.com",
       "ersaputrim25@gmail.com",
       "lutfi.mla@gmail.com",
+      "annisanurindriyanti@gmail.com",
     ];
 
     return allowedEmails.includes(user.email ?? "");
