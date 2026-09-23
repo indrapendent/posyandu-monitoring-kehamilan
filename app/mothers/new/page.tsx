@@ -20,7 +20,14 @@ export default function NewMotherPage() {
     useState("");
   const [isLoading, setIsLoading] =
     useState(false);
-
+  const [nik, setNik] = useState("");
+const [namaSuami, setNamaSuami] = useState("");
+const [tinggiBadan, setTinggiBadan] = useState("");
+const [riwayatCaesar, setRiwayatCaesar] =
+  useState(false);
+const [riwayatPenyakit, setRiwayatPenyakit] =
+  useState("");
+const [alergi, setAlergi] = useState("");
   function calculateHPL(date: string) {
     if (!date) return "";
 
@@ -42,13 +49,19 @@ export default function NewMotherPage() {
     setIsLoading(true);
 
     const payload = {
-      nama,
-      tanggal_lahir: tanggalLahir,
-      nomor_hp: nomorHp,
-      alamat,
-      hpht,
-      hpl,
-    };
+  nik,
+  nama,
+  nama_suami: namaSuami,
+  tanggal_lahir: tanggalLahir,
+  nomor_hp: nomorHp,
+  alamat,
+  tinggi_badan: Number(tinggiBadan),
+  riwayat_caesar: riwayatCaesar,
+  riwayat_penyakit: riwayatPenyakit,
+  alergi,
+  hpht,
+  hpl,
+};
 
     try {
       const response = await fetch(
@@ -150,6 +163,55 @@ export default function NewMotherPage() {
               required
             />
           </div>
+          <input
+  type="text"
+  value={nik}
+  onChange={(e) => setNik(e.target.value)}
+/>
+                <input
+  type="text"
+  value={namaSuami}
+  onChange={(e) =>
+    setNamaSuami(e.target.value)
+  }
+/>
+
+<input
+  type="number"
+  value={tinggiBadan}
+  onChange={(e) =>
+    setTinggiBadan(e.target.value)
+  }
+/>
+<select
+  value={riwayatCaesar ? "ya" : "tidak"}
+  onChange={(e) =>
+    setRiwayatCaesar(
+      e.target.value === "ya"
+    )
+  }
+>
+  <option value="tidak">Tidak</option>
+  <option value="ya">Ya</option>
+</select>
+
+<input
+  type="text"
+  value={riwayatPenyakit}
+  onChange={(e) =>
+    setRiwayatPenyakit(
+      e.target.value
+    )
+  }
+/>
+
+<input
+  type="text"
+  value={alergi}
+  onChange={(e) =>
+    setAlergi(e.target.value)
+  }
+/>
 
           <div>
             <label className="mb-2 block font-medium">
