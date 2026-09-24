@@ -44,6 +44,12 @@ export default function Navbar() {
           >
             Add Mother
           </Link>
+          <Link
+            href="/reports"
+            className="rounded-lg bg-yellow-600 px-4 py-2 text-white hover:bg-yellow-700"
+          >
+            Laporan
+          </Link>
         </div>
       </div>
     </nav>
